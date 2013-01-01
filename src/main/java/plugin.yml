@@ -1,0 +1,38 @@
+name: AcControl
+main: com.github.mckillroy.accontrol.P
+version: 0.1-dev
+
+commands:
+  accontrol:
+    aliases: [acc]
+    description: The autocraftcontroller command.
+    usage: |
+           /<command> setdebug (true/false) : enables or disables debug output.
+           /<command> showsettings : List the currently active settings.
+           /<command> listallowed : Lists all factions you are allowed to fly over.
+           /<command> setsafetyzone (int) : adds an additional buffer zone to the allowed distance from foreign land where flying is disallowed.
+           /<command> setallallowed (true/false) : Flying everywhere !
+           /<command> setplayerfactionok (true/false) : Flying over Players own land allowed?
+           /<command> setalliedfactionok (true/false) : Flying over allied factions land allowed?
+           /<command> addallowed (faction tag) : Add a faction to the list of allowed factions to fly over.
+           /<command> removeallowed (faction tag) : Remove a faction from the list of allowed factions to fly over. 
+           /<command> saveconfig : Save current settings to file.
+           /<command> reloadconfig : Reload settings from file and overwrite changes you made in between.
+    permission: accontrol.accontrol
+    permission-message: You don't have permission - <permission> - 
+permissions:
+  accontrol:
+    description: The basic accontrol permission
+    default: op
+    children:
+      showsettings: true
+      listallowed: true
+      setdebug: true
+      setallallowed: true
+      setplayerfactionok: true
+      setalliedfactionok: true
+      setsafetyzone: true
+      addallowed: true
+      removeallowed: true
+      saveconfig: true
+      reloadconfig: true      

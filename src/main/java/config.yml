@@ -1,0 +1,20 @@
+# debug: debug mode - spits out stuff
+# safetyzone: distance to keep away from disallowed factions with ship in blocks
+# factions: factions plugin section
+# PlayerFactionOK: Flying over players faction allowed?
+# AllAllowedOK: Flying everywhere allowed? (Basically switches off the plugin functionality)
+# AlliedFactionOK: Flying over allied factions allowed?
+# AllowedFactionIds: list with Ids of allowed factions - not tags, since tags can change
+# 0= Wilderness, -1=Safezone, -2=Warzone
+ 
+debug: false
+safetyzone: 8
+
+factions:
+ PlayerFactionOK: true
+ AllAllowed: false
+ AlliedFactionOK: false
+ AllowedFactionIds:
+ -  0
+ - -2 
+ 
