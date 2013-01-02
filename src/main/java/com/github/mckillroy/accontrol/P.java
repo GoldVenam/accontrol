@@ -106,7 +106,7 @@ public final class P extends JavaPlugin {
 	// Stuff
 	public static final Server SERVER = Bukkit.getServer();
 	public static final Logger LOG = SERVER.getLogger();
-	public static final String CHAT_PREFIX = "AutocraftChecker: ";
+	public static final String CHAT_PREFIX = "AcControl: ";
 
 	// Singleton Constructor should be protected - but we wont do it here and
 	// just (must) trust the system .. :P
@@ -452,14 +452,11 @@ public final class P extends JavaPlugin {
 	public void onEnable() {
 		// initializing config
 		// Config access
-		info("AcChecker enabled 0");
 		MyConfigAccessor = new ConfigAccessor(plugin, "config.yml");
-		info("AcChecker enabled 1");
 		reloadConfig();
-		info("AcChecker enabled 2");
 		// registering Listener Class
 		getServer().getPluginManager().registerEvents(new AcListener(), this);
-		info("AcChecker enabled 3");
+		info("Plugin enabled !");
 	}
 
 	/**
@@ -469,9 +466,9 @@ public final class P extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
-		info("AcChecker disabled");
 		saveConfig();
 		HandlerList.unregisterAll(this);
+		info("Plugin disabled");
 	}
 
 }

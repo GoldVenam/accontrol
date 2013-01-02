@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.mckillroy</groupId>
 	<artifactId>accontrol</artifactId>
-	<version>0.1-dev</version>
+	<version>0.2-dev</version>
 	<name>accontrol</name>
 	<url>http://maven.apache.org</url>
 	<properties>

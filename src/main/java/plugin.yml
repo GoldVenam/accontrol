@@ -1,6 +1,7 @@
 name: AcControl
 main: com.github.mckillroy.accontrol.P
 version: 0.1-dev
+depend: [Factions, AutoCraft]
 
 commands:
   accontrol:
