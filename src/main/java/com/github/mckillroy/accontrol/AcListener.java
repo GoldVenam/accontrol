@@ -387,9 +387,10 @@ public final class AcListener implements Listener {
 		case pilot:
 			// Handling /ac pilot command here
 			// If the player attempts to pilot a ship what shall happen?
-			P.msg(MyPlayer, "Loc : " + MyPlayer.getLocation().toString());
-			P.msg(MyPlayer, "Last: " + FPlayer.getLastStoodAt().toString());
-
+			if (P.config.getConfig().getBoolean("debug")) {
+				P.msg(MyPlayer, "Loc : " + MyPlayer.getLocation().toString());
+				P.msg(MyPlayer, "Last: " + FPlayer.getLastStoodAt().toString());
+			}
 			if (isAllowedFaction(Board.getFactionAt(FPlayer.getLastStoodAt()),
 					PFaction)) {
 
