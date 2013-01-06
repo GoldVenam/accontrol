@@ -107,7 +107,7 @@ public final class AcListener implements Listener {
 				MyFLocation.setZ(FLocation.blockToChunk(TLocation.getBlockZ()));
 				TFaction = Board.getFactionAt(MyFLocation);
 
-				if (P.debug) {
+				if (P.config.getConfig().getBoolean("debug")) {
 					MyPlayer.sendMessage(String.format(
 							"Chunklevel Check: x%s z%s Tags: %s %s",
 							MyFLocation.getX(), MyFLocation.getZ(), TFaction
@@ -177,7 +177,7 @@ public final class AcListener implements Listener {
 				if (isAllowedFaction(tFaction, pFaction)) {
 					// // The tested location has one of the
 					// allowed factions. We can move on.
-					if (P.debug) {
+					if (P.config.getConfig().getBoolean("debug")) {
 						MyPlayer.sendMessage(String.format(
 								"Blocklevel allowed faction tag: %s",
 								tFaction.getTag()));
@@ -189,7 +189,7 @@ public final class AcListener implements Listener {
 					// allowed factions
 					// We must return the found faction now
 
-					if (P.debug) {
+					if (P.config.getConfig().getBoolean("debug")) {
 						MyPlayer.sendMessage(String.format(
 								"Blocklevel forbidden faction found: %s",
 								tFaction.getTag()));
@@ -222,28 +222,37 @@ public final class AcListener implements Listener {
 	 */
 	public static boolean isAllowedFaction(final Faction faction,
 			final Faction playerFaction) {
+		// P.broadcast(P.CHAT_PREFIX+"Debug: "+String.valueOf(P.config.getConfig().getBoolean(
+		// "debug")));
+		// P.broadcast(P.CHAT_PREFIX+"AllowedFactionIDs: "+P.config.getConfig()
+		// .getStringList("factions.AllowedFactionIds").toString());
+		// P.broadcast(P.CHAT_PREFIX+"PlayerFactionOK? "+String.valueOf(P.config.getConfig().getBoolean(
+		// "factions.PlayerFactionOK")));
+		// P.broadcast(P.CHAT_PREFIX+"AlliedFactionOK? "+String.valueOf(P.config.getConfig().getBoolean(
+		// "factions.AlliedFactionOK")));
 		// if (debug) {
 		// P.broadcast(String.format(
 		// "isAllowedfaction? F= %s; Playerfaction= %s",
 		// faction.getTag(), playerFaction.getTag()));
 		// }
 		// Check 0: Flying everywhere??
-		if (P.allAllowed) {
+		if (P.config.getConfig().getBoolean("factions.AllAllowed")) {
 			return true;
 		}
 		// Check 1: Is tested faction in the allowed factions list?
-		if (P.allowedFactionIds.contains(faction.getId())) {
+		if (P.config.getConfig().getStringList("factions.AllowedFactionIds")
+				.contains(faction.getId())) {
 			return true;
 		}
 		// Check 2: Is the faction the players faction and is this allowed?
-		else if ((P.playerFactionOK)
-				&& (faction.getId().equals(playerFaction.getId()))) {
+		else if ((P.config.getConfig().getBoolean("factions.PlayerFactionOK") && (faction
+				.getId().equals(playerFaction.getId())))) {
 			return true;
 		}
 		// Check 3: Is the faction allied to the players faction and is this
 		// allowed?
-		else if (P.alliedFactionOK
-				&& (playerFaction.getRelationTo(faction) == Relation.ALLY)) {
+		else if ((P.config.getConfig().getBoolean("factions.AlliedFactionOK") && (playerFaction
+				.getRelationTo(faction) == Relation.ALLY))) {
 			return true;
 		}
 		// No allowed faction found
@@ -279,12 +288,13 @@ public final class AcListener implements Listener {
 		// We also need the move speed of the ship
 		int MoveSpeed = getMoveSpeed(MyPlayer);
 
-		if (P.debug) {
+		if (P.config.getConfig().getBoolean("debug")) {
 			MyPlayer.sendMessage(String.format(
 					"onInteract: MAX_SHIP_DIMENSIONS: %s; MOVE_SPEED: %s",
 					MaxShipsize, MoveSpeed));
 			MyPlayer.sendMessage(String.format(
-					"onInteract: Global safetyzone is %s Blocks", P.safetyzone));
+					"onInteract: Global safetyzone is %s Blocks", P.config
+							.getConfig().getInt("safetyzone")));
 		}
 
 		// Amount of chunks around the player to test for foreign land. 1
@@ -292,16 +302,17 @@ public final class AcListener implements Listener {
 		// This must be at least of the size MAX_SHIP_DIMENSION plus the
 		// safetydistance plus the move speed to stay away from foreign
 		// territory
-		int chunks = ((MaxShipsize + P.safetyzone + MoveSpeed) / 16) + 1;
+		int chunks = ((MaxShipsize + P.config.getConfig().getInt("safetyzone") + MoveSpeed) / 16) + 1;
 
-		if (P.debug) {
+		if (P.config.getConfig().getBoolean("debug")) {
 			MyPlayer.sendMessage(String.format(
 					"SetData: chunks is %s chunks arund the Pilot", chunks));
 		}
 
 		if (hasForeignChunks(MyPlayer, chunks)) {
 			// do blocklevel check for ForeignFactions
-			int blocks = MaxShipsize + P.safetyzone + MoveSpeed;
+			int blocks = MaxShipsize
+					+ P.config.getConfig().getInt("safetyzone") + MoveSpeed;
 			String FFac = factionBlockCheck(MyPlayer, blocks);
 			if (!(FFac.equals(""))) {
 				Autocraft.shipmanager.ships.remove(MyPlayer.getName()); // unpiloting
@@ -322,7 +333,7 @@ public final class AcListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public static void onPlayerCommandPreprocess(
 			PlayerCommandPreprocessEvent event) {
-		if (P.debug) {
+		if (P.config.getConfig().getBoolean("debug")) {
 			P.broadcast("Entering CmdPre");
 		}
 		// //////////////////////////////
@@ -337,7 +348,7 @@ public final class AcListener implements Listener {
 
 		// do we have an ac command (=autocraft)? if not return.
 		if (!(Words[0].equals("/ac"))) {
-			if (P.debug) {
+			if (P.config.getConfig().getBoolean("debug")) {
 				P.broadcast("Issued non-ac command: ".concat(Words[0]));
 			}
 			return;
@@ -350,7 +361,7 @@ public final class AcListener implements Listener {
 		// Get the player
 		Player MyPlayer = event.getPlayer();
 
-		if (P.debug) {
+		if (P.config.getConfig().getBoolean("debug")) {
 			MyPlayer.sendMessage(String.format(
 					"DbgCmd: Hello %s! You issued the command: %s",
 					MyPlayer.getName(), Cmd));
@@ -362,7 +373,7 @@ public final class AcListener implements Listener {
 		// get faction from Fplayer whos is our player
 		Faction PFaction = FPlayer.getFaction();
 
-		if (P.debug) {
+		if (P.config.getConfig().getBoolean("debug")) {
 			MyPlayer.sendMessage(String.format("DbgCmd: Your faction is %s",
 					PFaction.getTag()));
 		}
@@ -376,11 +387,13 @@ public final class AcListener implements Listener {
 		case pilot:
 			// Handling /ac pilot command here
 			// If the player attempts to pilot a ship what shall happen?
+			P.msg(MyPlayer, "Loc : " + MyPlayer.getLocation().toString());
+			P.msg(MyPlayer, "Last: " + FPlayer.getLastStoodAt().toString());
 
 			if (isAllowedFaction(Board.getFactionAt(FPlayer.getLastStoodAt()),
 					PFaction)) {
 
-				if (P.debug) {
+				if (P.config.getConfig().getBoolean("debug")) {
 					P.broadcast("pilot check: Standing on land of allowed faction: "
 							.concat(Board
 									.getFactionAt(FPlayer.getLastStoodAt())
@@ -391,7 +404,7 @@ public final class AcListener implements Listener {
 				return;
 			} else {
 
-				if (P.debug) {
+				if (P.config.getConfig().getBoolean("debug")) {
 					P.broadcast("pilot check: Standing on land of forbidden faction: "
 							.concat(Board
 									.getFactionAt(FPlayer.getLastStoodAt())
@@ -407,7 +420,7 @@ public final class AcListener implements Listener {
 						.format("\u00a7eAircontrol does not allow piloting here! (%s's land)",
 								Board.getFactionAt(FPlayer.getLastStoodAt())
 										.getTag()));
-				if (P.debug) {
+				if (P.config.getConfig().getBoolean("debug")) {
 					P.broadcast("Leaving case pilot, cancelled");
 				}
 				return;
@@ -437,14 +450,15 @@ public final class AcListener implements Listener {
 			// distance from foreign territory:
 			// which is safezone+MaxShipsize
 			// debug
-			if (P.debug) {
+			if (P.config.getConfig().getBoolean("debug")) {
 				MyPlayer.sendMessage(String.format("Autocraft command: %s",
 						Words[1]));
 				MyPlayer.sendMessage(String.format(
 						"PilotData: MAX_SHIP_DIMENSIONS: %s, MoveSpeed: %s",
 						MaxShipsize, MoveSpeed));
 				MyPlayer.sendMessage(String.format(
-						"ConfigData: safetyzone is %s Blocks", P.safetyzone));
+						"ConfigData: safetyzone is %s Blocks", P.config
+								.getConfig().getInt("safetyzone")));
 			}
 
 			// Amount of blocks around the player to test for foreign land.
@@ -452,8 +466,9 @@ public final class AcListener implements Listener {
 			// This must be at least of the size MAX_SHIP_DIMENSION plus the
 			// safetydistance plus the shipspeed to stay away from foreign
 			// territory
-			int chunks = (MaxShipsize + P.safetyzone) / 16 + 1;
-			if (P.debug) {
+			int chunks = (MaxShipsize + P.config.getConfig().getInt(
+					"safetyzone")) / 16 + 1;
+			if (P.config.getConfig().getBoolean("debug")) {
 				MyPlayer.sendMessage(String.format(
 						"SetData: turn - chunks is %s chunks arund the Pilot",
 						chunks));
@@ -481,14 +496,15 @@ public final class AcListener implements Listener {
 			// test area is a region of saftetyzone+MaxShipSize around the
 			// player (in each direction on x-z plane)
 			// for just turning the ship we don't need to check the speed
-			int blocks = P.safetyzone + MaxShipsize;
+			int blocks = P.config.getConfig().getInt("safetyzone")
+					+ MaxShipsize;
 			String FactionBlockCheckResult = factionBlockCheck(MyPlayer, blocks);
 			if (FactionBlockCheckResult.equals("")) {
 				return;
 			}
 			// The tested location has none of the allowed factions
 			// We must calculate distance now
-			if (P.debug) {
+			if (P.config.getConfig().getBoolean("debug")) {
 				MyPlayer.sendMessage(String.format(
 						"Blocklevel forbidden faction tag: %s",
 						FactionBlockCheckResult));

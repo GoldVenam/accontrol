@@ -6,7 +6,7 @@ depend: [Factions, AutoCraft]
 commands:
   accontrol:
     aliases: [acc]
-    description: The autocraftcontroller command.
+    description: "The autocraftcontroller command. Alias:  /acc. Use \"/acc help\" for subcommands."  
     usage: |
            /<command> setdebug (true/false) : enables or disables debug output.
            /<command> showsettings : List the currently active settings.
