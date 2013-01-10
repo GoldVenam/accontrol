@@ -353,6 +353,7 @@ public final class AcListener implements Listener {
 			}
 			return;
 		}
+		
 
 		// ////////////////////////////////////////////////////////////////
 		// //////////////////// Getting some data: ////////////////////////
@@ -382,152 +383,194 @@ public final class AcListener implements Listener {
 		// // Command Parser ////
 		// //////////////////////
 
-		switch (P.aclvl2Cmds.valueOf(Words[1])) {
-
-		case pilot:
-			// Handling /ac pilot command here
-			// If the player attempts to pilot a ship what shall happen?
-			if (P.config.getConfig().getBoolean("debug")) {
-				P.msg(MyPlayer, "Loc : " + MyPlayer.getLocation().toString());
-				P.msg(MyPlayer, "Last: " + FPlayer.getLastStoodAt().toString());
-			}
-			if (isAllowedFaction(Board.getFactionAt(FPlayer.getLastStoodAt()),
-					PFaction)) {
-
-				if (P.config.getConfig().getBoolean("debug")) {
-					P.broadcast("pilot check: Standing on land of allowed faction: "
-							.concat(Board
-									.getFactionAt(FPlayer.getLastStoodAt())
-									.getTag()));
-					P.broadcast("Leaving case pilot, nocancel. event:"
-							.concat(event.toString()));
-				}
+		try {
+			switch (P.aclvl2Cmds.valueOf((String) Words[1].trim())) {
+			case p:
+				handlePilot(event, MyPlayer, FPlayer, PFaction);
 				return;
-			} else {
-
-				if (P.config.getConfig().getBoolean("debug")) {
-					P.broadcast("pilot check: Standing on land of forbidden faction: "
-							.concat(Board
-									.getFactionAt(FPlayer.getLastStoodAt())
-									.getTag()));
-				}
-
-				// Okay - he is in forbidden territory
-				// Now screw him up that crappy pilot !
-				Autocraft.shipmanager.ships.remove(MyPlayer.getName()); // unpiloting
-				event.setCancelled(true);
-				// player
-				MyPlayer.sendMessage(String
-						.format("\u00a7eAircontrol does not allow piloting here! (%s's land)",
-								Board.getFactionAt(FPlayer.getLastStoodAt())
-										.getTag()));
-				if (P.config.getConfig().getBoolean("debug")) {
-					P.broadcast("Leaving case pilot, cancelled");
-				}
+			case pilot:
+				handlePilot(event, MyPlayer, FPlayer, PFaction);
 				return;
-			}
-		case turn:
-			// ////////////////////////////////////////////////////////
-			// Core logic - player is verified as being a pilot
-			// ////////////////////////////////////////////////////////
-			if (!(Autocraft.shipmanager.ships.containsKey(MyPlayer.getName()))) {
-				// player is no pilot - we can ignore and return
+			case rotate:
+				handleTurn(event, Words, MyPlayer);
 				return;
-			}
-			// //////////////////////////////////////////////////////////////////
-			// ////////////////////// Defining some data:
-			// //////////////////////////////////////////////////////////////////
-
-			// There is the property MAX_SHIP_DIMENSIONS - i need to make sure,
-			// that the pilot is at least this amount of blocks plus a safety
-			// distance away from foreign land before turning the ship
-			// Therefore we need to get the ship the player is piloting and
-			// check its MAX_SHIP_DIMENSIONS property.
-			int MaxShipsize = Autocraft.shipmanager.ships.get(MyPlayer
-					.getName()).properties.MAX_SHIP_DIMENSIONS;
-			int MoveSpeed = getMoveSpeed(MyPlayer);
-
-			// if a player attempts to turn his ship he must be in a safe
-			// distance from foreign territory:
-			// which is safezone+MaxShipsize
-			// debug
-			if (P.config.getConfig().getBoolean("debug")) {
-				MyPlayer.sendMessage(String.format("Autocraft command: %s",
-						Words[1]));
-				MyPlayer.sendMessage(String.format(
-						"PilotData: MAX_SHIP_DIMENSIONS: %s, MoveSpeed: %s",
-						MaxShipsize, MoveSpeed));
-				MyPlayer.sendMessage(String.format(
-						"ConfigData: safetyzone is %s Blocks", P.config
-								.getConfig().getInt("safetyzone")));
-			}
-
-			// Amount of blocks around the player to test for foreign land.
-			// 1 means a 3x3 chunks area around the player is checked.
-			// This must be at least of the size MAX_SHIP_DIMENSION plus the
-			// safetydistance plus the shipspeed to stay away from foreign
-			// territory
-			int chunks = (MaxShipsize + P.config.getConfig().getInt(
-					"safetyzone")) / 16 + 1;
-			if (P.config.getConfig().getBoolean("debug")) {
-				MyPlayer.sendMessage(String.format(
-						"SetData: turn - chunks is %s chunks arund the Pilot",
-						chunks));
-
-			}
-
-			// ////////////////////////////////////////////////////////
-			// // Chunklevel test loop
-			// ////////////////////////////////////////////////////////
-			// If no foreign factions are found in the surrounding chunks
-			// within the test didstance we can return - else we make a
-			// blocklevel check
-			if (!(hasForeignChunks(MyPlayer, chunks))) {
+			case r:
+				handleTurn(event, Words, MyPlayer);
 				return;
-			}
-			// The tested chunks have none of the allowed factions
-			// We must to further tests and maybe screw him up since a foreign
-			// faction was found in the currently checked location
-			// Check distance of player to the tested location
-			// ///////////////////////////////////////////////////////////////////////////////
-			// // Blocklevel test loop - reached when a foreign faction is found
-			// at chunklevel
-			// ///////////////////////////////////////////////////////////////////////////////
-			// Now we need to dive into blockwise checking for foreign factions
-			// test area is a region of saftetyzone+MaxShipSize around the
-			// player (in each direction on x-z plane)
-			// for just turning the ship we don't need to check the speed
-			int blocks = P.config.getConfig().getInt("safetyzone")
-					+ MaxShipsize;
-			String FactionBlockCheckResult = factionBlockCheck(MyPlayer, blocks);
-			if (FactionBlockCheckResult.equals("")) {
+			case turn:
+				handleTurn(event, Words, MyPlayer);
 				return;
-			}
-			// The tested location has none of the allowed factions
-			// We must calculate distance now
-			if (P.config.getConfig().getBoolean("debug")) {
-				MyPlayer.sendMessage(String.format(
-						"Blocklevel forbidden faction tag: %s",
-						FactionBlockCheckResult));
-			}
-			// Okay - he is too near !
-			// Autocraft.shipmanager.ships.remove(MyPlayer.getName()); //
-			// unpiloting
-			event.setCancelled(true);// cancelling command
-			// player
-			MyPlayer.sendMessage(String
-					.format("\u00a7cToo close to forbidden zone: \u00a7b%s\u00a7c. \u00a7eAircontrol does not allow turning here!",
-							FactionBlockCheckResult));
-			// end of case "turn"
+			case t:
+				handleTurn(event, Words, MyPlayer);
+				return;
 
-		default:
-			break;
+			default:
 
-		// end of switch
+				break;
+
+			// end of switch
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			P.info("Player has used an /ac command unhandled by AcControl: "+event.getMessage());
+			//e.printStackTrace();
 		}
 
 		// End of Player Command Eventhandler
 		// return;
+	}
+
+	/**
+	 * @param event
+	 * @param Words
+	 * @param MyPlayer
+	 */
+	public static void handleTurn(PlayerCommandPreprocessEvent event,
+			String[] Words, Player MyPlayer) {
+		// ////////////////////////////////////////////////////////
+		// Core logic - player is verified as being a pilot
+		// ////////////////////////////////////////////////////////
+		if (!(Autocraft.shipmanager.ships.containsKey(MyPlayer.getName()))) {
+			// player is no pilot - we can ignore and return
+			return;
+		}
+		// //////////////////////////////////////////////////////////////////
+		// ////////////////////// Defining some data:
+		// //////////////////////////////////////////////////////////////////
+
+		// There is the property MAX_SHIP_DIMENSIONS - i need to make sure,
+		// that the pilot is at least this amount of blocks plus a safety
+		// distance away from foreign land before turning the ship
+		// Therefore we need to get the ship the player is piloting and
+		// check its MAX_SHIP_DIMENSIONS property.
+		int MaxShipsize = Autocraft.shipmanager.ships.get(MyPlayer
+				.getName()).properties.MAX_SHIP_DIMENSIONS;
+		int MoveSpeed = getMoveSpeed(MyPlayer);
+
+		// if a player attempts to turn his ship he must be in a safe
+		// distance from foreign territory:
+		// which is safezone+MaxShipsize
+		// debug
+		if (P.config.getConfig().getBoolean("debug")) {
+			MyPlayer.sendMessage(String.format("Autocraft command: %s",
+					Words[1]));
+			MyPlayer.sendMessage(String.format(
+					"PilotData: MAX_SHIP_DIMENSIONS: %s, MoveSpeed: %s",
+					MaxShipsize, MoveSpeed));
+			MyPlayer.sendMessage(String.format(
+					"ConfigData: safetyzone is %s Blocks", P.config
+							.getConfig().getInt("safetyzone")));
+		}
+
+		// Amount of blocks around the player to test for foreign land.
+		// 1 means a 3x3 chunks area around the player is checked.
+		// This must be at least of the size MAX_SHIP_DIMENSION plus the
+		// safetydistance plus the shipspeed to stay away from foreign
+		// territory
+		int chunks = (MaxShipsize + P.config.getConfig().getInt(
+				"safetyzone")) / 16 + 1;
+		if (P.config.getConfig().getBoolean("debug")) {
+			MyPlayer.sendMessage(String.format(
+					"SetData: turn - chunks is %s chunks arund the Pilot",
+					chunks));
+
+		}
+
+		// ////////////////////////////////////////////////////////
+		// // Chunklevel test loop
+		// ////////////////////////////////////////////////////////
+		// If no foreign factions are found in the surrounding chunks
+		// within the test didstance we can return - else we make a
+		// blocklevel check
+		if (!(hasForeignChunks(MyPlayer, chunks))) {
+			return;
+		}
+		// The tested chunks have none of the allowed factions
+		// We must to further tests and maybe screw him up since a foreign
+		// faction was found in the currently checked location
+		// Check distance of player to the tested location
+		// ///////////////////////////////////////////////////////////////////////////////
+		// // Blocklevel test loop - reached when a foreign faction is found
+		// at chunklevel
+		// ///////////////////////////////////////////////////////////////////////////////
+		// Now we need to dive into blockwise checking for foreign factions
+		// test area is a region of saftetyzone+MaxShipSize around the
+		// player (in each direction on x-z plane)
+		// for just turning the ship we don't need to check the speed
+		int blocks = P.config.getConfig().getInt("safetyzone")
+				+ MaxShipsize;
+		String FactionBlockCheckResult = factionBlockCheck(MyPlayer, blocks);
+		if (FactionBlockCheckResult.equals("")) {
+			return;
+		}
+		// The tested location has none of the allowed factions
+		// We must calculate distance now
+		if (P.config.getConfig().getBoolean("debug")) {
+			MyPlayer.sendMessage(String.format(
+					"Blocklevel forbidden faction tag: %s",
+					FactionBlockCheckResult));
+		}
+		// Okay - he is too near !
+		// Autocraft.shipmanager.ships.remove(MyPlayer.getName()); //
+		// unpiloting
+		event.setCancelled(true);// cancelling command
+		// player
+		MyPlayer.sendMessage(String
+				.format("\u00a7cToo close to forbidden zone: \u00a7b%s\u00a7c. \u00a7eAircontrol does not allow turning here!",
+						FactionBlockCheckResult));
+		// end of case "turn"
+		return;
+	}
+
+	/**
+	 * @param event
+	 * @param MyPlayer
+	 * @param FPlayer
+	 * @param PFaction
+	 */
+	public static void handlePilot(PlayerCommandPreprocessEvent event,
+			Player MyPlayer, FPlayer FPlayer, Faction PFaction) {
+		// Handling /ac pilot command here
+		// If the player attempts to pilot a ship what shall happen?
+		if (P.config.getConfig().getBoolean("debug")) {
+			P.msg(MyPlayer, "Loc : " + MyPlayer.getLocation().toString());
+			P.msg(MyPlayer, "Last: " + FPlayer.getLastStoodAt().toString());
+		}
+		if (isAllowedFaction(Board.getFactionAt(FPlayer.getLastStoodAt()),
+				PFaction)) {
+
+			if (P.config.getConfig().getBoolean("debug")) {
+				P.broadcast("pilot check: Standing on land of allowed faction: "
+						.concat(Board
+								.getFactionAt(FPlayer.getLastStoodAt())
+								.getTag()));
+				P.broadcast("Leaving case pilot, nocancel. event:"
+						.concat(event.toString()));
+			}
+			return;
+		} else {
+
+			if (P.config.getConfig().getBoolean("debug")) {
+				P.broadcast("pilot check: Standing on land of forbidden faction: "
+						.concat(Board
+								.getFactionAt(FPlayer.getLastStoodAt())
+								.getTag()));
+			}
+
+			// Okay - he is in forbidden territory
+			// Now screw him up that crappy pilot !
+			Autocraft.shipmanager.ships.remove(MyPlayer.getName()); // unpiloting
+			event.setCancelled(true);
+			// player
+			MyPlayer.sendMessage(String
+					.format("\u00a7eAircontrol does not allow piloting here! (%s's land)",
+							Board.getFactionAt(FPlayer.getLastStoodAt())
+									.getTag()));
+			if (P.config.getConfig().getBoolean("debug")) {
+				P.broadcast("Leaving case pilot, cancelled");
+			}
+			return;
+		}
 	}
 
 	// End of Listener Class

@@ -35,8 +35,9 @@ public final class P extends JavaPlugin {
 	 * listener class
 	 */
 	public static enum aclvl2Cmds {
-		pilot, turn;
+		pilot,p,turn,t,rotate,r;
 	} // needed later for switch in command parsing of 2nd word in retrieved
+	
 
 	/**
 	 * This is needed for parsing the commands later Commands: # <br>
@@ -133,7 +134,8 @@ public final class P extends JavaPlugin {
 		config.reloadConfig();
 		// registering Listener Class
 		getServer().getPluginManager().registerEvents(new AcListener(), this);
-		// This will throw a NullPointException if you don't have the command defined in your plugin.yml file!
+		// This will throw a NullPointException if you don't have the command
+		// defined in your plugin.yml file!
 		getCommand("accontrol").setExecutor(new cmdExecutor(this));
 		info("Plugin enabled !");
 	}
