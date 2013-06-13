@@ -12,9 +12,9 @@ safetyzone: 8
 
 factions:
  PlayerFactionOK: true
- AllAllowed: false
- AlliedFactionOK: false
+ AllAllowed: true
+ AlliedFactionOK: true
  AllowedFactionIds:
- -  0
+ - -1
  - -2 
  
